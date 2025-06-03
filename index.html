@@ -14,16 +14,19 @@
     } else {
       document.documentElement.classList.remove('dark');
     }
-    // Provide process.env.API_KEY for development if not set by environment.
-    // In a real deployment, this would be set by the environment.
-    // For this sandbox, if you have an API_KEY, you can paste it here.
-    // IMPORTANT: Do NOT commit API keys to version control.
-    if (!process) {
-      window.process = { env: {} };
-    }
+    // API_KEYはCloudflare Pagesの環境変数に設定し、
+    // サーバーサイドのFunction (`functions/api/generate-restaurant.ts`) で使用します。
+    // クライアントサイドのJavaScriptで直接APIキーを参照することはなくなりました。
+    // ローカル開発時に手動でAPIキーを設定する必要も基本的にはありません。
+    // もしローカルでFunctionsをエミュレート実行し、そこで環境変数が必要な場合は、
+    // Wranglerなどのローカル開発ツールの指示に従ってください。
+    /*
+    // --- Deprecated: Old local API Key setup for client-side usage ---
+    // if (!process) {
+    //   window.process = { env: {} };
+    // }
     // Example: window.process.env.API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
-    // Make sure to replace "YOUR_GEMINI_API_KEY_HERE" or ensure it's set in your execution environment.
-    // If API_KEY is not set, the app will show an error related to API key.
+    */
   </script>
   <style>
     /* Custom scrollbar for webkit browsers for better dark mode aesthetics */
@@ -57,7 +60,8 @@
     "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
     "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.3.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.3.0",
+    "@cloudflare/workers-types": "https://esm.sh/@cloudflare/workers-types@^4.20250603.0"
   }
 }
 </script>
