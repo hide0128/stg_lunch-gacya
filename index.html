@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -16,17 +15,6 @@
     }
     // API_KEYはCloudflare Pagesの環境変数に設定し、
     // サーバーサイドのFunction (`functions/api/generate-restaurant.ts`) で使用します。
-    // クライアントサイドのJavaScriptで直接APIキーを参照することはなくなりました。
-    // ローカル開発時に手動でAPIキーを設定する必要も基本的にはありません。
-    // もしローカルでFunctionsをエミュレート実行し、そこで環境変数が必要な場合は、
-    // Wranglerなどのローカル開発ツールの指示に従ってください。
-    /*
-    // --- Deprecated: Old local API Key setup for client-side usage ---
-    // if (!process) {
-    //   window.process = { env: {} };
-    // }
-    // Example: window.process.env.API_KEY = "YOUR_GEMINI_API_KEY_HERE"; 
-    */
   </script>
   <style>
     /* Custom scrollbar for webkit browsers for better dark mode aesthetics */
@@ -65,10 +53,9 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 transition-colors duration-300">
   <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+  <script type="module" src="/main.js"></script>
 </body>
 </html>
