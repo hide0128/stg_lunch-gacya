@@ -18,14 +18,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant, isFavorite,
           <h3 className="text-xl font-semibold text-sky-700 dark:text-sky-400">{restaurant.name}</h3>
           <button 
             onClick={() => onToggleFavorite(restaurant)} 
-            className={`p-1.5 rounded-full text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-700 
+            className={`p-2 rounded-full text-yellow-500 hover:bg-yellow-100 dark:hover:bg-slate-700 
                         ${isFavorite ? 'text-yellow-400 dark:text-yellow-300' : 'text-slate-400 dark:text-slate-500'}`}
             aria-label={isFavorite ? "お気に入りから外す" : "お気に入りに追加"}
           >
             <StarIcon className="w-6 h-6" isFilled={isFavorite} />
           </button>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 h-16 overflow-y-auto">{restaurant.description}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 h-20 overflow-y-auto">{restaurant.description}</p>
         
         <div className="space-y-1 text-sm mb-3">
           <p><span className="font-semibold">ジャンル:</span> {restaurant.genre}</p>
@@ -40,14 +40,14 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant, isFavorite,
             href={googleSearchUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full text-center px-4 py-2 border border-sky-600 dark:border-sky-500 text-sky-600 dark:text-sky-400 rounded-md hover:bg-sky-50 dark:hover:bg-sky-700/50 font-medium transition-colors"
+            className="block w-full text-center px-4 py-2.5 border border-sky-600 dark:border-sky-500 text-sky-600 dark:text-sky-400 rounded-md hover:bg-sky-50 dark:hover:bg-sky-700/50 font-medium transition-colors"
           >
             お店の情報をGoogleで検索
           </a>
         ) : (
           <button
             disabled
-            className="block w-full text-center px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 rounded-md font-medium cursor-not-allowed"
+            className="block w-full text-center px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 rounded-md font-medium cursor-not-allowed"
             aria-label="店舗名不明のため検索不可"
           >
             店舗名不明のため検索不可

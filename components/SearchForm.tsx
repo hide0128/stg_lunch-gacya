@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GENRE_OPTIONS } from '../constants';
 import { SearchCriteria } from '../types';
@@ -35,7 +34,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching, initialC
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 bg-white dark:bg-slate-800 shadow-lg rounded-lg space-y-6">
+    <form onSubmit={handleSubmit} className="p-4 sm:p-6 bg-white dark:bg-slate-800 shadow-lg rounded-lg space-y-5 sm:space-y-6">
       <div>
         <label htmlFor="station" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
           最寄り駅 (必須)
@@ -49,7 +48,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching, initialC
             if (e.target.value.trim()) setStationError('');
           }}
           placeholder="例: 東京駅, 渋谷駅 西口"
-          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50"
+          className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 text-base sm:text-sm"
         />
         {stationError && <p className="text-sm text-red-500 mt-1">{stationError}</p>}
       </div>
@@ -58,13 +57,13 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching, initialC
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           料理ジャンル
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 sm:gap-2.5">
           {GENRE_OPTIONS.map((genre) => (
             <button
               type="button"
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-3 py-1.5 text-sm rounded-full border transition-colors duration-150
+              className={`px-3 py-2 text-sm rounded-full border transition-colors duration-150
                 ${selectedGenre === genre 
                   ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' 
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-sky-100 dark:hover:bg-slate-600'
@@ -86,14 +85,14 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isSearching, initialC
           value={keywords}
           onChange={(e) => setKeywords(e.target.value)}
           placeholder="例: 個室あり, おしゃれな雰囲気, 子連れOK"
-          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50"
+          className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 text-base sm:text-sm"
         />
       </div>
 
       <button
         type="submit"
         disabled={isSearching}
-        className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:bg-sky-500 dark:hover:bg-sky-600 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors duration-150"
+        className="w-full flex items-center justify-center px-6 py-3.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:bg-sky-500 dark:hover:bg-sky-600 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors duration-150"
       >
         {isSearching ? (
           <>

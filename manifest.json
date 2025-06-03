@@ -1,0 +1,17 @@
+{
+  "short_name": "らんちガチャ",
+  "name": "らんちガチャ - ランチ探しを楽しく簡単に",
+  "description": "「今日のランチ、どこにしようかな？」と悩んだときに、あなたにピッタリのお店を偶然見つけてくれる、楽しいランチ探しアプリです。",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0ea5e9"
+}

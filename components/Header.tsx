@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { APP_TITLE } from '../constants';
 import SunIcon from './icons/SunIcon';
@@ -17,10 +16,10 @@ const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onToggleF
     <header className="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-sky-600 dark:text-sky-400">{APP_TITLE}</h1>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={onToggleFavorites}
-            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-500 dark:text-rose-400 relative"
+            className="p-2.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-500 dark:text-rose-400 relative"
             aria-label="お気に入り"
           >
             <HeartIcon className="w-6 h-6" />
@@ -32,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onToggleF
           </button>
           <button
             onClick={onToggleDarkMode}
-            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-yellow-500 dark:text-yellow-400"
+            className="p-2.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-yellow-500 dark:text-yellow-400"
             aria-label={isDarkMode ? "ライトモードに切り替え" : "ダークモードに切り替え"}
           >
             {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}

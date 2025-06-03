@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Restaurant } from '../types';
 import RestaurantCard from './RestaurantCard';
@@ -17,6 +16,9 @@ const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ favorites, onToggleFavo
     <div 
       className="fixed inset-0 bg-black/50 dark:bg-black/70 z-50 flex justify-end"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="favorites-panel-title"
     >
       <div 
         className="w-full max-w-md h-full bg-white dark:bg-slate-800 shadow-xl flex flex-col transform transition-transform duration-300 ease-in-out"
@@ -24,11 +26,11 @@ const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ favorites, onToggleFavo
         style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
       >
         <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">お気に入りのお店</h2>
+          <h2 id="favorites-panel-title" className="text-xl font-semibold text-slate-800 dark:text-slate-100">お気に入りのお店</h2>
           <button 
             onClick={onClose}
-            className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
-            aria-label="閉じる"
+            className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+            aria-label="お気に入りパネルを閉じる"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -37,7 +39,7 @@ const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ favorites, onToggleFavo
         </div>
 
         {favorites.length === 0 ? (
-          <div className="flex-grow flex items-center justify-center">
+          <div className="flex-grow flex items-center justify-center p-5">
             <p className="text-slate-500 dark:text-slate-400">お気に入りのお店はありません。</p>
           </div>
         ) : (

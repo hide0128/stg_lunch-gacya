@@ -4,14 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>らんちガチャ</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#0ea5e9"> <!-- sky-600 -->
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="/manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     // Tailwind dark mode setup
     if (localStorage.getItem('lunchGachaDarkMode') === 'true' || 
         (!('lunchGachaDarkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#020617'); // slate-900 for dark mode
     } else {
       document.documentElement.classList.remove('dark');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0ea5e9'); // sky-600 for light mode
     }
     // API_KEYはCloudflare Pagesの環境変数に設定し、
     // サーバーサイドのFunction (`functions/api/generate-restaurant.ts`) で使用します。
