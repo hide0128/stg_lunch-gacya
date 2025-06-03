@@ -176,6 +176,9 @@ const App: React.FC = () => {
       />
        <footer className="py-4 text-center text-sm text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700">
         &copy; {new Date().getFullYear()} らんちガチャ. All rights reserved.
+        {process.env.APP_VERSION && (
+          <span className="ml-2">v{process.env.APP_VERSION}</span>
+        )}
       </footer>
     </div>
   );
