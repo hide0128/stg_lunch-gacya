@@ -1,0 +1,210 @@
+
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import { AiRestaurant, WebChunk, SearchCriteria } from '../types';
+import { API_MODEL_NAME } from '../constants';
+
+let ai: GoogleGenAI | null = null;
+
+const initializeAiClient = (): GoogleGenAI => {
+  if (ai) return ai;
+  
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API_KEY is not configured in process.env.API_KEY");
+    throw new Error("APIキーが設定されていません。環境変数を確認してください。");
+  }
+  ai = new GoogleGenAI({ apiKey });
+  return ai;
+};
+
+
+const constructPrompt = (criteria: SearchCriteria): string => {
+  const { station, genre, keywords, isReGacha } = criteria;
+
+  let reGachaInstructions = "";
+  if (isReGacha) {
+    reGachaInstructions = `
+# 再検索に関する特別指示
+これはユーザーによる「別のお店をガチャる！」操作（再検索）です。
+**前回提案したお店とは異なる、新しいお店を優先して提案するように努めてください。** ユーザーは多様な選択肢と新しい発見を期待しています。
+もし前回と同じようなお店しか見つからない場合は、検索範囲を少し広げたり、異なる角度（例: 評価が高い、隠れた名店など）からお店を探すなど、工夫して前回とは違う提案をしてください。
+`;
+  }
+
+  return `あなたはランチのレストランを提案するAIアシスタントです。ユーザーから指定された「最寄り駅」周辺のレストランを、Google検索を駆使して探し出し、最大3軒まで提案してください。
+提案する情報は**全てGoogle検索結果から得られた最新かつ正確な情報**に基づいてください。特に、レストランの名称、住所、アクセス情報が指定された「最寄り駅」（${station}）と地理的に明確に関連していることを慎重に確認してください。提案するレストランの住所とアクセス情報が、指定された「最寄り駅」（${station}）の**ごく近隣**に位置することを、**複数の情報源で照合・確認**してください。明らかに駅と関連のない場所のレストランは絶対に含めないでください。
+${reGachaInstructions}
+# 必須条件
+- **最寄り駅**: ${station} (この駅の周辺の店舗のみを提案してください。提案するレストランの住所やアクセス情報が、この駅と地理的に一致することをGoogle検索結果から極めて慎重に検証してください。)
+- **情報源**: Google検索結果。各レストランの情報（名称、説明、ジャンル、アクセス、予算、住所）は、検索で見つかった具体的なウェブページの内容を正確に反映し、**Google検索等で確認した具体的な情報のみを記述してください。曖昧な表現や一般的な記述は避け、店舗固有の情報を優先してください**。AIの一般的な知識や推測で情報を補完しないでください。**提案するレストランの各情報は、あなたが参照したウェブページの内容と完全に一致している必要があります。あなたの一般的な知識や、検索結果から直接読み取れない推測で情報を補完しないでください。**
+- **レストランの存在確認**: 提案するレストランが現在も営業していることを確認してください。古い情報や閉業した店舗は提案しないでください。
+
+# 任意条件
+- ジャンル: ${genre && genre !== "特に指定なし" ? genre : "指定なし (多様なジャンルを考慮)"}
+- キーワード・気分: ${keywords && keywords.trim() !== "" ? keywords : "指定なし"}
+
+# 出力形式
+以下のJSON形式で、レストランの配列として回答してください。あなたの応答は、このJSON配列**そのもの**でなければなりません。JSONデータの前後に、いかなる挨拶、説明、注釈、空白行なども含めないでください。JSONデータ内の文字列値にも、会話的な表現（例：「ええと、このお店は…」）は含めず、直接的で客観的な情報を記述してください。
+各レストランオブジェクトには、以下のキーを必ず含めてください。
+- name: string (レストランの正式名称。検索結果と完全に一致させてください。)
+- description: string (レストランの簡単な説明。検索結果に基づき、具体的かつ魅力的に、日本語で100文字程度で記述してください。)
+- genre: string (料理ジャンル。例: イタリアン, 和食。検索結果から特定してください。)
+- access: string (指定された最寄り駅「${station}」からの具体的なアクセス情報。例: 「${station}から徒歩5分」。検索結果に基づいてください。)
+- budget: string (おおよそのランチ予算。例: 「¥1,000～¥1,999」。検索結果から特定してください。)
+- address: string (レストランの正確な住所。検索結果に基づいてください。この住所が「${station}」周辺であることを確認してください。)
+- url: string (レストランの公式ウェブサイトまたは主要なグルメサイトの店舗個別ページのURL。見つかれば記載し、適切なものが見つからなければ空文字列 "" としてください。このURLの検証は以前ほど厳格ではありませんが、可能な限り正確なものを目指してください。)
+
+例 (あくまで形式の例であり、内容は検索結果に応じて具体的に記述してください):
+\`\`\`json
+[
+  {
+    "name": "AIビストロ東京",
+    "description": "最新技術を駆使した創作料理が楽しめる。ランチは特に人気。",
+    "genre": "創作料理",
+    "access": "${station}から徒歩5分",
+    "budget": "ランチ ¥1,500～¥2,500",
+    "address": "東京都AI区検索町1-1-1 AIビル1F",
+    "url": "https://www.example.com/ai-bistro-tokyo-specific-branch"
+  },
+  {
+    "name": "駅前カフェ・プロンプト",
+    "description": "こだわりのコーヒーと軽食を提供。待ち合わせにも便利。",
+    "genre": "カフェ",
+    "access": "${station}から徒歩1分",
+    "budget": "ランチ ¥800～¥1,200",
+    "address": "東京都AI区${station}駅前ビルディング 2F",
+    "url": ""
+  }
+]
+\`\`\`
+
+# 注意事項 (再掲)
+- 上記JSON形式に厳密に従って回答してください。
+- **あなたの応答は、指示されたJSON配列そのものでなければなりません。JSONデータの前後に、いかなる挨拶、説明、注釈、空白行なども含めないでください。**
+- **全ての情報は、Google検索結果から得られた具体的な内容に基づいてください。不確かな情報や推測に基づく情報は含めないでください。**
+- 提案する各レストランの情報（特に住所やアクセス情報）が、指定された「最寄り駅」(${station})と地理的に一致することをGoogle検索結果から慎重に確認してください。
+- 条件に合うレストランが見つからない場合は、空の配列 \`[]\` を返してください。**その際、他のテキストは一切含めないでください。**
+`;
+};
+
+const isValidRestaurantItem = (item: any): item is Partial<AiRestaurant> => {
+  if (!item || typeof item !== 'object') return false;
+  
+  // name and address are essential.
+  if (typeof item.name !== 'string' || !item.name.trim()) return false;
+  if (typeof item.address !== 'string' || !item.address.trim()) return false;
+
+  // url must be a string (can be empty). If not empty, it must look like a valid http/https URL.
+  if (typeof item.url !== 'string') return false;
+  if (item.url.trim() !== "") { // If URL is not an empty string, validate its format
+    if (!(item.url.startsWith('http://') || item.url.startsWith('https://'))) return false;
+    // Check if URL is not just 'http://' or 'https://'
+    if (item.url === 'http://' || item.url === 'https://') return false;
+  }
+
+  // Other fields like description, genre, access, budget are desirable but not strictly essential for basic validity.
+  // They will default to "情報なし" if missing or not a string.
+  return true;
+};
+
+
+export const fetchRestaurants = async (
+  criteria: SearchCriteria
+): Promise<{ restaurants: AiRestaurant[], sources: WebChunk[] }> => {
+  try {
+    const client = initializeAiClient();
+    const prompt = constructPrompt(criteria);
+
+    const response: GenerateContentResponse = await client.models.generateContent({
+      model: API_MODEL_NAME,
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+    
+    let jsonStr = response.text; 
+    
+    const fenceRegex = /```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/;
+    const match = jsonStr.match(fenceRegex);
+
+    if (match && match[1]) {
+      jsonStr = match[1].trim(); 
+    } else {
+      jsonStr = jsonStr.trim();
+      if (!((jsonStr.startsWith("[") && jsonStr.endsWith("]")) || (jsonStr.startsWith("{") && jsonStr.endsWith("}")))) {
+        console.warn("JSON fence ```json ... ``` not found and response doesn't look like a JSON array/object. Full response:", response.text);
+      }
+    }
+    
+    let parsedData: any;
+    try {
+      parsedData = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error("Failed to parse JSON response after fence removal:", e);
+      console.error("Original JSON string:", jsonStr);
+      console.error("Full AI response text:", response.text);
+      throw new Error(`AIからの応答を解析できませんでした。JSON形式が正しくない可能性があります。AIの応答: ${jsonStr.substring(0,1000)}`);
+    }
+
+    if (!Array.isArray(parsedData)) {
+      console.warn("Parsed data is not an array, attempting to use as single object array if valid:", parsedData);
+      if (isValidRestaurantItem(parsedData)) {
+        parsedData = [parsedData]; 
+      } else {
+          throw new Error("AIからの応答が期待されるレストラン情報の配列形式ではありません。");
+      }
+    }
+
+    const validRestaurants: AiRestaurant[] = [];
+    for (const item of parsedData) {
+      if (isValidRestaurantItem(item)) {
+        validRestaurants.push({
+          name: item.name || "名称不明",
+          description: typeof item.description === 'string' ? item.description : "情報なし",
+          genre: typeof item.genre === 'string' ? item.genre : "情報なし",
+          access: typeof item.access === 'string' ? item.access : "情報なし",
+          budget: typeof item.budget === 'string' ? item.budget : "情報なし",
+          address: item.address || "住所不明",
+          url: item.url || "", 
+        });
+      } else {
+        console.warn("Invalid restaurant item received from AI, skipping:", item);
+      }
+    }
+    
+    const sources: WebChunk[] = [];
+    // Process groundingMetadata from the SDK response directly
+    const sdkGroundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+
+    if (sdkGroundingChunks) {
+        sdkGroundingChunks.forEach(sdkChunk => {
+            // The SDK's GroundingChunk typically has `web?: { uri?: string; title?: string; }`
+            // We need to ensure uri is a valid non-empty string to match our WebChunk type.
+            if (sdkChunk.web && typeof sdkChunk.web.uri === 'string' && sdkChunk.web.uri.trim() !== '') {
+                const uri = sdkChunk.web.uri;
+                // Ensure title is also a non-empty string, defaulting to URI if title is missing, undefined, or empty.
+                const title = (typeof sdkChunk.web.title === 'string' && sdkChunk.web.title.trim() !== '') 
+                              ? sdkChunk.web.title 
+                              : uri;
+                sources.push({ uri, title });
+            }
+        });
+    }
+    
+    const finalRestaurants = validRestaurants.filter(r => r.name !== "名称不明" && r.address !== "住所不明");
+
+    if (finalRestaurants.length === 0 && parsedData.length > 0) {
+        console.warn("AI returned data, but none were valid restaurants after processing:", parsedData);
+    }
+    
+    return { restaurants: finalRestaurants, sources };
+
+  } catch (error) {
+    console.error("Error fetching or processing restaurants:", error);
+    if (error instanceof Error && error.message.startsWith("APIキーが設定されていません")) {
+        throw error;
+    }
+    throw new Error(`レストラン情報の取得中にエラーが発生しました。AIとの通信に問題があったか、予期せぬ形式の応答がありました。詳細: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
