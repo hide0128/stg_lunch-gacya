@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Header from './components/Header';
 import SearchForm from './components/SearchForm';
 import RestaurantList from './components/RestaurantList';
@@ -31,6 +31,8 @@ const App: React.FC = () => {
   const [showFavoritesPanel, setShowFavoritesPanel] = useState<boolean>(false);
   const [currentSearchCriteria, setCurrentSearchCriteria] = useState<SearchCriteria | undefined>(undefined);
 
+  const resultsListRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -50,12 +52,11 @@ const App: React.FC = () => {
     setShowWelcome(false);
     
     const searchCriteriaWithReGacha: SearchCriteria = { ...criteria, isReGacha };
-    setCurrentSearchCriteria(criteria); // Store base criteria for re-gacha without the isReGacha flag itself for multiple re-gachas
+    setCurrentSearchCriteria(criteria); 
     setSearchResults([]); 
     setSourceUrls([]);
 
     try {
-      // Pass the potentially modified criteria (with isReGacha) to fetchRestaurants
       const { restaurants: aiRestaurants, sources } = await fetchRestaurants(searchCriteriaWithReGacha);
       const restaurantsWithIds: Restaurant[] = aiRestaurants.map((resto: AiRestaurant) => ({
         ...resto,
@@ -85,9 +86,15 @@ const App: React.FC = () => {
 
   const handleReGacha = useCallback(() => {
     if (currentSearchCriteria) {
-      handleSearch(currentSearchCriteria, true); // Pass true for isReGacha
+      handleSearch(currentSearchCriteria, true); 
     }
   }, [currentSearchCriteria, handleSearch]);
+
+  useEffect(() => {
+    if (resultsListRef.current && searchResults.length > 0 && !isLoading && !error) {
+      resultsListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [searchResults, isLoading, error]);
 
   const toggleFavorite = useCallback((restaurant: Restaurant) => {
     setFavorites(prevFavorites => {
@@ -117,7 +124,7 @@ const App: React.FC = () => {
       />
       <main className="container mx-auto px-4 py-8 flex-grow">
         <SearchForm 
-          onSearch={(criteria) => handleSearch(criteria, false)} // Standard search is not a re-gacha
+          onSearch={(criteria) => handleSearch(criteria, false)}
           isSearching={isLoading}
           initialCriteria={currentSearchCriteria} 
         />
@@ -127,15 +134,17 @@ const App: React.FC = () => {
         {error && !isLoading && <ErrorMessage message={error} onRetry={currentSearchCriteria ? handleReGacha : undefined} />}
 
         {!isLoading && !error && searchResults.length > 0 && (
-          <RestaurantList
-            restaurants={searchResults}
-            sources={sourceUrls}
-            onToggleFavorite={toggleFavorite}
-            isFavorite={isRestaurantFavorite}
-            onReGacha={handleReGacha}
-            isLoading={isLoading} 
-            searchCriteriaUsed={currentSearchCriteria}
-          />
+          <div ref={resultsListRef}>
+            <RestaurantList
+              restaurants={searchResults}
+              sources={sourceUrls}
+              onToggleFavorite={toggleFavorite}
+              isFavorite={isRestaurantFavorite}
+              onReGacha={handleReGacha}
+              isLoading={isLoading} 
+              searchCriteriaUsed={currentSearchCriteria}
+            />
+          </div>
         )}
         
         {!isLoading && !error && searchResults.length === 0 && !showWelcome && (

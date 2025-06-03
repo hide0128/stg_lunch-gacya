@@ -122,6 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
+        thinkingConfig: { thinkingBudget: 0 }, // 思考時間を最小限に設定
       },
     });
     
